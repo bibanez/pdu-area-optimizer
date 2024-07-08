@@ -1,0 +1,7 @@
+images
+csv_files
+.vscode
+*.o
+program
+*.csv
+*.gif
