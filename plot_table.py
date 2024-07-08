@@ -19,6 +19,6 @@ def plot_table(table):
     plt.show()
 
 if __name__ == "__main__":
-    filename = 'output.csv'
+    filename = 'output_final.csv'
     table = read_csv(filename)
     plot_table(table)
