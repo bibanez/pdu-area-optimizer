@@ -37,6 +37,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gstreamer-1.24.5-haf2f30d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-8.5.0-hfac3d4d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/icu-73.2-h59595ed_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/imageio-2.34.2-pyh12aca89_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/keyutils-1.6.1-h166bdaf_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/kiwisolver-1.4.5-py312h8572e83_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/krb5-1.21.3-h659f571_0.conda
@@ -689,6 +690,23 @@ packages:
   license_family: MIT
   size: 12089150
   timestamp: 1692900650789
+- kind: conda
+  name: imageio
+  version: 2.34.2
+  build: pyh12aca89_0
+  subdir: noarch
+  noarch: python
+  url: https://conda.anaconda.org/conda-forge/noarch/imageio-2.34.2-pyh12aca89_0.conda
+  sha256: 915c65d36343aaaa57db56f96d4d992310dd11534f4be8d5452faccb85335a3d
+  md5: 97ad994fae55dce96bd397054b32e41a
+  depends:
+  - numpy
+  - pillow >=8.3.2
+  - python >=3
+  license: BSD-2-Clause
+  license_family: BSD
+  size: 290787
+  timestamp: 1719235104890
 - kind: conda
   name: keyutils
   version: 1.6.1
