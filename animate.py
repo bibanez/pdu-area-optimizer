@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import imageio
+import imageio.v2 as imageio
 import os
 
 def create_image_from_csv(csv_file, image_file):
@@ -39,9 +39,9 @@ def main():
     create_gif(image_folder, gif_file)
 
     # Clean up image files
-    for image_file in os.listdir(image_folder):
-        os.remove(os.path.join(image_folder, image_file))
-    os.rmdir(image_folder)
+    #for image_file in os.listdir(image_folder):
+    #    os.remove(os.path.join(image_folder, image_file))
+    #os.rmdir(image_folder)
 
 if __name__ == "__main__":
     main()

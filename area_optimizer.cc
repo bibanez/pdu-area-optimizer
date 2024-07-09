@@ -14,11 +14,10 @@ AreaOptimizer::AreaOptimizer(int width, int height, vector<Point> sources, vecto
     this->_n_sources = sources.size();
     this->_sources = sources;
     this->_weights = weights;
-    this->_table = vector<vector<int>>(height, vector<int>(width, -1));
 }
 
 void AreaOptimizer::_fill_areas() {
-    _cell_sum = vector<pair<int, Point>>(_n_sources, {0, {0, 0}});
+    _table = vector<vector<int>>(_height, vector<int>(_width, -1));
 
     vector<queue<Point>> queues(_n_sources);
     for (int i = 0; i < _n_sources; ++i) {
@@ -40,9 +39,6 @@ void AreaOptimizer::_fill_areas() {
             if (0 <= x && x < _width && 0 <= y && y < _height && _table[x][y] == -1) {
                 _table[x][y] = index;
                 area -= 1/_weights[index]; // Order from small to large
-                _cell_sum[index].first += 1;
-                _cell_sum[index].second.x += x;
-                _cell_sum[index].second.y += y;
                 for (int i = 0; i < 4; ++i) {
                     int nx = x + dx[i];
                     int ny = y + dy[i];
@@ -55,8 +51,19 @@ void AreaOptimizer::_fill_areas() {
 }
 
 void AreaOptimizer::_expand() {
+    vector<pair<int, Point>> cell_sum(_n_sources, {0, {0, 0}});
+
+    for (int x = 0; x < _width; ++x) {
+        for (int y = 0; y < _height; ++y) {
+            int index = _table[x][y];
+            cell_sum[index].first++;
+            cell_sum[index].second.x += x;
+            cell_sum[index].second.y += y;
+        }
+    }
+
     for (int i = 0; i < _n_sources; ++i) {
-        auto [n, p] = _cell_sum[i];
+        auto [n, p] = cell_sum[i];
         if (n > 0)
             _sources[i] = {p.x/n, p.y/n};
         else
@@ -84,4 +91,26 @@ void AreaOptimizer::save_to_csv(const string& filename) {
     }
     file.close();
     cout << "Table saved to " << filename << endl;
+}
+
+/**
+ * Pre: -
+ * Post: Returns the number of cells occupied by a given source
+ **/
+vector<int> AreaOptimizer::get_areas() {
+    vector<int> area(_n_sources, 0);
+    for (int x = 0; x < _width; ++x) {
+        for (int y = 0; y < _height; ++y) {
+            ++area[_table[x][y]];
+        }
+    }
+    return area;
+}
+
+/**
+ * Pre: -
+ * Post: Returns the weights associated to each source
+ **/
+vector<float> AreaOptimizer::get_weights() {
+    return _weights;
 }

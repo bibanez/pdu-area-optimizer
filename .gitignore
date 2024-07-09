@@ -5,6 +5,7 @@ csv_files
 program
 *.csv
 *.gif
+results
 # pixi environments
 .pixi
 *.egg-info
