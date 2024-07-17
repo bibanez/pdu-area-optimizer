@@ -6,6 +6,8 @@ program
 *.csv
 *.gif
 results
+build
+.cache
 # pixi environments
 .pixi
 *.egg-info

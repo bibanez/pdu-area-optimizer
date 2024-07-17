@@ -2,10 +2,14 @@
 #define __AREA_OPTIMIZER_H
 
 #include <vector>
-#include <string>
 
 struct Point {
     int x, y;
+
+    // operator for comparison
+    bool operator==(const Point &p) const {
+        return x == p.x && y == p.y;
+    }
 };
 
 class AreaOptimizer {
@@ -14,15 +18,19 @@ class AreaOptimizer {
     std::vector<float> _weights;
     std::vector<std::vector<int>> _table;
 
+    bool _converged;
+
     void _fill_areas();
     void _expand();
 
 public:
     AreaOptimizer(int width, int height, std::vector<Point> sources, std::vector<float> weights);
     void run_iteration();
-    void save_to_csv(const std::string& filename);
     std::vector<int> get_areas();
     std::vector<float> get_weights();
+    std::vector<Point> get_sources();
+    std::vector<std::vector<int>> get_table();
+    bool converged();
 };
 
 #endif
