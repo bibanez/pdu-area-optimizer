@@ -1,6 +1,6 @@
 #include "area_optimizer.h"
+#include "types.h"
 #include <chrono>
-#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <matplot/matplot.h>
@@ -40,13 +40,13 @@ void save_iteration_as_image(AreaOptimizer &optimizer, int iteration,
   }
 
   // Get the sources before running the iteration
-  std::vector<Point> sources_before = optimizer.get_sources();
+  std::vector<Vector2D> sources_before = optimizer.get_sources();
 
   // Run the iteration
   optimizer.run_iteration();
 
   // Get the sources after running the iteration
-  std::vector<Point> sources_after = optimizer.get_sources();
+  std::vector<Vector2D> sources_after = optimizer.get_sources();
 
   // Plot the sources before and after with scatter plots and connect them with
   // arrows
@@ -113,8 +113,8 @@ string get_name(SOURCES s, LAYOUT l, WEIGHTS w) {
 void run_test(int n, int num_iterations, SOURCES s, LAYOUT l, WEIGHTS w) {
   string name = get_name(s, l, w);
   cout << "Running test " << name << "..." << endl;
-  vector<Point> sources;
-  vector<float> weights;
+  vector<Vector2D> sources;
+  vector<double> weights;
   if (s == FEW) {
     for (int i = 0; i < 2; ++i) {
       for (int j = 0; j < 2; ++j) {
@@ -135,20 +135,21 @@ void run_test(int n, int num_iterations, SOURCES s, LAYOUT l, WEIGHTS w) {
     }
   }
   if (w == SAME)
-    weights = vector<float>(sources.size(), 1);
+    weights = vector<double>(sources.size(), 1);
   else {
-    weights = vector<float>(sources.size());
-    for (int i = 0; i < sources.size(); ++i) {
+    weights = vector<double>(sources.size());
+    for (unsigned int i = 0; i < sources.size(); ++i) {
       weights[i] = 1 + rand() % 9;
     }
   }
 
-  AreaOptimizer optimizer(n, n, sources, weights);
-  for (int i = 0; not optimizer.converged() and i < num_iterations; ++i) {
+  AreaOptimizer optimizer(n, n, n/10, sources, weights);
+  for (int i = 0; not optimizer.is_converged() and i < num_iterations; ++i) {
     optimizer.run_iteration();
     save_iteration_as_image(optimizer, i, name);
   }
 
+  // We wait because otherwise it won't read the files
   this_thread::sleep_for(chrono::seconds(1));
 
   // Commands for generating palette, GIF, and MP4
@@ -213,3 +214,14 @@ int main(int argc, char *argv[]) {
       for (int k = 0; k < 2; ++k)
         run_test(n, num_iterations, SOURCES(i), LAYOUT(j), WEIGHTS(k));
 }
+
+/*
+int main() {
+  int n = 32;
+  AreaOptimizer optimizer(n, n, n/16, {{0,0}, {n-1,n-1}},
+                          {1, 3});
+  optimizer.run_iteration();
+  //print_colored_table(optimizer.get_table());
+  save_iteration_as_image(optimizer, 1, "test");
+}
+*/

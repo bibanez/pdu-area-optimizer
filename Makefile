@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O3 -g
 
 # Source files
-SRCS = main.cc area_optimizer.cc
+SRCS = main.cc area_optimizer.cc types.cc
 
 # Object files
 OBJS = $(SRCS:.cc=.o)

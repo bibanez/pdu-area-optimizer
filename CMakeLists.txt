@@ -20,6 +20,7 @@ add_compile_options(-Wall -Wextra -O3 -g)
 add_executable(program
     main.cc
     area_optimizer.cc
+    types.cc
 )
 
 # Link Matplot++
