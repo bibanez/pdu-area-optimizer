@@ -1,14 +1,8 @@
-images
-csv_files
 .vscode
 *.o
 program
 *.csv
 *.gif
-results
 build
 .cache
 .zed
-# pixi environments
-.pixi
-*.egg-info

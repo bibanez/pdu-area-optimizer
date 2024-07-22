@@ -1,52 +1,13 @@
-#include "area_optimizer.h"
+
+#include "ortho_area_optimizer.h"
 #include "list.h"
-#include "types.h"
 
 #include <assert.h>
 #include <cstdlib>
 #include <queue>
-
-#include <iostream>
 using namespace std;
 
-const string RESET = "\033[0m";
-const vector<string> COLORS = {
-    "\033[48;5;196m", // Red
-    "\033[48;5;202m", // Orange
-    "\033[48;5;226m", // Yellow
-    "\033[48;5;46m",  // Green
-    "\033[48;5;21m"   // Blue
-                      // Add more colors if needed
-};
-
-void print_colored_table(const vector<vector<int>> &table) {
-  for (const auto &row : table) {
-    for (const auto &cell : row) {
-      if (cell >= 0 && cell < COLORS.size()) {
-        cout << COLORS[cell] << cell << " "
-             << RESET; // Print two spaces with background color
-      } else {
-        cout << "  "; // Default for undefined regions
-      }
-    }
-    cout << endl;
-  }
-  cout << endl;
-}
-
-void print_edge_info(const Edge &e) {
-  if (e.dir == DOWN)
-    cout << "DOWN";
-  else if (e.dir == UP)
-    cout << "UP";
-  else if (e.dir == LEFT)
-    cout << "LEFT";
-  else if (e.dir == RIGHT)
-    cout << "RIGHT";
-  cout << ' ' << e.source.x << ' ' << e.source.y << ' ' << e.length << endl;
-}
-
-AreaOptimizer::AreaOptimizer(int width, int height, int limit,
+OrthoAreaOptimizer::OrthoAreaOptimizer(int width, int height, int limit,
                              vector<Vector2D> sources, vector<double> weights) {
   _width = width;
   _height = height;
@@ -61,7 +22,7 @@ AreaOptimizer::AreaOptimizer(int width, int height, int limit,
   _converged = false;
 }
 
-void AreaOptimizer::_fill_areas() {
+void OrthoAreaOptimizer::_fill_areas() {
   priority_queue<pair<double, int>> pq;
   for (int i = 0; i < _n_regions; ++i) {
     Region &r = _regions[i];
@@ -76,18 +37,9 @@ void AreaOptimizer::_fill_areas() {
   }
 
   // Main loop
-  // TODO: remove iteration
-  int iteration = 0;
   while (not pq.empty()) {
     auto [_, r_index] = pq.top();
     pq.pop();
-
-    // TODO remove
-    // cout << "Iteration " << iteration << "... Region " << r_index << endl;
-    // print_colored_table(_table);
-    // FOR_EACH_NODE(_regions[r_index].edge_list, node) {
-    //   print_edge_info(node->data);
-    // }
 
     Region &r = _regions[r_index];
 
@@ -97,14 +49,10 @@ void AreaOptimizer::_fill_areas() {
       _expand_edge(r_index, e_ptr);
       pq.push({-r.area / r.weight, r_index});
     }
-    // TODO
-    // char c;
-    // cin >> c;
-    ++iteration; // TODO remove
   }
 }
 
-void AreaOptimizer::_correct_centroids() {
+void OrthoAreaOptimizer::_correct_centroids() {
   for (Region &r : _regions) {
     if (r.area > 0)
       r.source = {r.cell_sum.x / r.area, r.cell_sum.y / r.area};
@@ -117,7 +65,7 @@ Edge expand_edge_aux(const Edge &e) {
   return {e.dir, e.source + e.normal(), e.length};
 }
 
-void AreaOptimizer::_expand_edge(int r_index, Node<Edge> *e_ptr) {
+void OrthoAreaOptimizer::_expand_edge(int r_index, Node<Edge> *e_ptr) {
   // cout << "Expanding edge region " << r_index << ": ";
   // print_edge_info(e_ptr->data);
   Edge e = expand_edge_aux(e_ptr->data);
@@ -127,11 +75,11 @@ void AreaOptimizer::_expand_edge(int r_index, Node<Edge> *e_ptr) {
   _add_edge(r_index, {ROTATE_CLOCKWISE(e.dir), e.end(), 1});
 }
 
-bool AreaOptimizer::_out_of_bounds(Vector2D pos) {
+bool OrthoAreaOptimizer::_out_of_bounds(Vector2D pos) {
   return pos.x < 0 or pos.x >= _width or pos.y < 0 or pos.y >= _height;
 }
 
-vector<Edge> AreaOptimizer::_break_up_edge(const Edge &e) {
+vector<Edge> OrthoAreaOptimizer::_break_up_edge(const Edge &e) {
   vector<Edge> v_edges;
 
   Edge current_edge;
@@ -158,7 +106,7 @@ vector<Edge> AreaOptimizer::_break_up_edge(const Edge &e) {
   return v_edges;
 }
 
-void AreaOptimizer::_add_edge(int r_index, Edge e) {
+void OrthoAreaOptimizer::_add_edge(int r_index, Edge e) {
   // cout << "Adding edge to region " << r_index << ": ";
   // print_edge_info(e);
   Region &r = _regions[r_index];
@@ -215,7 +163,7 @@ void AreaOptimizer::_add_edge(int r_index, Edge e) {
     _add_edge_table(r_index, edge);
 }
 
-void AreaOptimizer::_delete_edge(int r_index, Node<Edge> *e_ptr) {
+void OrthoAreaOptimizer::_delete_edge(int r_index, Node<Edge> *e_ptr) {
   Region &r = _regions[r_index];
   Edge &e = e_ptr->data;
   // cout << "Deleting edge from region " << r_index << ": ";
@@ -226,7 +174,7 @@ void AreaOptimizer::_delete_edge(int r_index, Node<Edge> *e_ptr) {
   r.edge_list.delete_node(e_ptr);
 }
 
-Node<Edge> *AreaOptimizer::_select_edge(int r_index) {
+Node<Edge> *OrthoAreaOptimizer::_select_edge(int r_index) {
   Region &r = _regions[r_index];
   Node<Edge> *max_ptr = nullptr;
   int max_dist = -1;
@@ -264,48 +212,35 @@ Node<Edge> *AreaOptimizer::_select_edge(int r_index) {
   return max_ptr;
 }
 
-/*
-Node<Edge> *AreaOptimizer::_select_edge(int r_index) {
-  Region &r = _regions[r_index];
-  int max_length = 0;
-  Node<Edge> *selected_node = nullptr;
-  FOR_EACH_NODE(r.edge_list, node) {
-    if (node->data.length > max_length)
-      selected_node = node;
-  }
-  return selected_node;
-}
-*/
-
-void AreaOptimizer::_add_edge_table(int r_index, const Edge &e) {
+void OrthoAreaOptimizer::_add_edge_table(int r_index, const Edge &e) {
   Region &r = _regions[r_index];
   Node<Edge> *e_ptr = r.edge_list.push_back(e);
   for (Vector2D pos : _iterate_edge(e))
     _edge_tables[pos.x][pos.y][e.dir] = e_ptr;
 }
 
-vector<int> AreaOptimizer::get_areas() {
+vector<int> OrthoAreaOptimizer::get_areas() {
   vector<int> areas(_n_regions);
   for (int i = 0; i < _n_regions; ++i)
     areas[i] = _regions[i].area;
   return areas;
 }
 
-vector<double> AreaOptimizer::get_weights() {
+vector<double> OrthoAreaOptimizer::get_weights() {
   vector<double> weights(_n_regions);
   for (int i = 0; i < _n_regions; ++i)
     weights[i] = _regions[i].weight;
   return weights;
 }
 
-vector<Vector2D> AreaOptimizer::get_sources() {
+vector<Vector2D> OrthoAreaOptimizer::get_sources() {
   vector<Vector2D> sources = vector<Vector2D>(_n_regions);
   for (int i = 0; i < _n_regions; ++i)
     sources[i] = _regions[i].source;
   return sources;
 }
 
-vector<Vector2D> AreaOptimizer::_iterate_edge(const Edge &e) {
+vector<Vector2D> OrthoAreaOptimizer::_iterate_edge(const Edge &e) {
   vector<Vector2D> positions;
   if (e.source.x < 0 or e.source.x >= _width or e.source.y < 0 or
       e.source.y >= _height)
@@ -335,7 +270,7 @@ vector<Vector2D> AreaOptimizer::_iterate_edge(const Edge &e) {
   return positions;
 }
 
-void AreaOptimizer::_clear_structures() {
+void OrthoAreaOptimizer::_clear_structures() {
   // Clear tables
   for (int i = 0; i < _width; ++i) {
     for (int j = 0; j < _height; ++j) {
@@ -354,7 +289,7 @@ void AreaOptimizer::_clear_structures() {
   }
 }
 
-void AreaOptimizer::run_iteration() {
+void OrthoAreaOptimizer::run_iteration() {
   if (not _converged) {
     vector<Vector2D> old_sources = get_sources();
     _clear_structures();
@@ -365,6 +300,6 @@ void AreaOptimizer::run_iteration() {
   }
 }
 
-vector<vector<int>> AreaOptimizer::get_table() { return _table; }
+RegionIndices OrthoAreaOptimizer::get_table() { return _table; }
 
-bool AreaOptimizer::is_converged() { return _converged; }
+bool OrthoAreaOptimizer::is_converged() { return _converged; }

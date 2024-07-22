@@ -1,4 +1,4 @@
-#include "area_optimizer.h"
+#include "ortho_area_optimizer.h"
 #include "types.h"
 #include <chrono>
 #include <iomanip>
@@ -143,7 +143,7 @@ void run_test(int n, int num_iterations, SOURCES s, LAYOUT l, WEIGHTS w) {
     }
   }
 
-  AreaOptimizer optimizer(n, n, n/10, sources, weights);
+  OrthoAreaOptimizer optimizer(n, n, n/10, sources, weights);
   for (int i = 0; not optimizer.is_converged() and i < num_iterations; ++i) {
     optimizer.run_iteration();
     save_iteration_as_image(optimizer, i, name);

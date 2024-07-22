@@ -19,7 +19,8 @@ add_compile_options(-Wall -Wextra -O3 -g)
 # Add executable
 add_executable(program
     main.cc
-    area_optimizer.cc
+    ortho_area_optimizer.cc
+    grid_cell_area_optimizer.cc
     types.cc
 )
 
